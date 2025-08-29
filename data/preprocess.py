@@ -8,30 +8,34 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message
 log = logging.getLogger("preprocessing")
 RANDOM_SEED = 42
 
-def preprocess_ml(filename):
+def preprocess_movielens(filename="ml-1m/ratings.dat"):
+    """Preprocesses the MovieLens-1M dataset."""
+    log.info(f"Processing MovieLens-1M from: {filename}")
     input_filepath = os.path.join(FILE_DIR, filename)
-    with open(input_filepath, 'r') as file:
-        data = file.read()
+    with open(input_filepath, 'r', encoding='latin-1') as file:
+        data = "user,item,rating,timestamp\n" + file.read()
         data = data.replace("::", ",")
 
-    outpath = os.path.join(OUT_DIR, filename).replace(".dat", ".csv")    
+    outpath = os.path.join(OUT_DIR, "movielens/ratings.csv")
     os.makedirs(os.path.dirname(outpath), exist_ok=True)
     
     with open(outpath, 'w') as outfile:
         outfile.write(data)
+    log.info(f"Saved processed MovieLens-1M data to: {outpath}")
 
-def preprocess_lf(filename):
+def preprocess_lastfm(filename="lastfm/user_artists.dat"):
+    """Preprocesses the LastFM dataset."""
+    log.info(f"Processing LastFM from: {filename}")
     input_filepath = os.path.join(FILE_DIR, filename)
-    with open(input_filepath, 'r') as file:
-        lines = file.read().strip().splitlines()[1:]
-
-    outpath = os.path.join(OUT_DIR, "lastfm/user_artists.csv")    
-    os.makedirs(os.path.dirname(outpath), exist_ok=True)
     
-    with open(outpath, 'w') as outfile:
-        for line in lines:
-            csv_line = line.replace("\t", ",")
-            outfile.write(csv_line + "\n")
+    df = pd.read_csv(input_filepath, sep='\t')
+    df.columns = ['user', 'item', 'rating']
+    df['timestamp'] = np.arange(len(df))
+    
+    outpath = os.path.join(OUT_DIR, "lastfm/ratings.csv")
+    os.makedirs(os.path.dirname(outpath), exist_ok=True)
+    df.to_csv(outpath, index=False)
+    log.info(f"Saved processed LastFM data to: {outpath}")
 
 
 def preprocess_bookcrossing():
@@ -123,58 +127,12 @@ def preprocess_steam():
     df_processed = df_processed[final_columns]
     
     df_processed['user'] = df_processed['user'].astype(np.int64)
-    df_processed['item'] = df_processed['item'].astype(np.int64) # Now an integer
+    df_processed['item'] = df_processed['item'].astype(np.int64)
     df_processed['rating'] = df_processed['rating'].astype(float)
     df_processed['timestamp'] = df_processed['timestamp'].astype(np.int64)
 
     os.makedirs(os.path.dirname(output_ratings_filepath), exist_ok=True)
     df_processed.to_csv(output_ratings_filepath, index=False)
-
-def preprocess_restaurant():
-
-    dataset_folder = "restaurants"
-    filename = "rating_final.csv" 
-    input_filepath = os.path.join(FILE_DIR, dataset_folder, filename)
-    
-    output_ratings_filepath = os.path.join(OUT_DIR, dataset_folder, "ratings.csv")
-    output_user_mapping_filepath = os.path.join(OUT_DIR, dataset_folder, "user_mapping.csv")
-
-    try:
-        df = pd.read_csv(input_filepath)
-    except Exception as e:
-        return
-
-    df = df[['userID', 'placeID', 'rating']].copy()
-
-    df_aggregated = df.groupby(['userID', 'placeID'])['rating'].mean().reset_index()
-    
-    unique_user_ids_str = df_aggregated['userID'].unique()
-    user_mapping_df = pd.DataFrame({
-        'user_id_new': np.arange(len(unique_user_ids_str)),
-        'user_id_original': unique_user_ids_str            
-    })
-    
-    os.makedirs(os.path.dirname(output_user_mapping_filepath), exist_ok=True)
-    user_mapping_df.to_csv(output_user_mapping_filepath, index=False)
-
-    user_id_to_new_id_dict = pd.Series(user_mapping_df.user_id_new.values, index=user_mapping_df.user_id_original).to_dict()
-
-    df_aggregated['user'] = df_aggregated['userID'].map(user_id_to_new_id_dict)
-    
-    df_processed = df_aggregated.rename(columns={'placeID': 'item'})
-
-    df_processed['timestamp'] = np.arange(len(df_processed))
-
-    final_columns = ['user', 'item', 'rating', 'timestamp']
-    df_final = df_processed[final_columns].copy()
-    
-    df_final['user'] = df_final['user'].astype(np.int64) 
-    df_final['item'] = df_final['item'].astype(np.int64) 
-    df_final['rating'] = df_final['rating'].astype(float)
-    df_final['timestamp'] = df_final['timestamp'].astype(np.int64)
-
-    os.makedirs(os.path.dirname(output_ratings_filepath), exist_ok=True)
-    df_final.to_csv(output_ratings_filepath, index=False)
 
 def preprocess_amazon_books():
 
@@ -226,13 +184,13 @@ def preprocess_amazon_books():
     
     final_unique_users = df_sampled['user_original'].unique()
     user_mapping_df = pd.DataFrame({
-        'user': np.arange(len(final_unique_users)), # New integer IDs
+        'user': np.arange(len(final_unique_users)),
         'user_original': final_unique_users
     })
     
     final_unique_items = df_sampled['item_original'].unique()
     item_mapping_df = pd.DataFrame({
-        'item': np.arange(len(final_unique_items)), # New integer IDs
+        'item': np.arange(len(final_unique_items)),
         'item_original': final_unique_items
     })
 
@@ -283,7 +241,7 @@ def preprocess_online_retail():
     log.info(f"Removed rows with missing CustomerID, {len(df)} rows remaining.")
     
     df = df[~df['InvoiceNo'].astype(str).str.startswith('C')]
-    # Remove transactions with non-positive quantity
+
     df = df[df['Quantity'] > 0]
     log.info(f"Removed cancellations and non-positive quantities, {len(df)} rows remaining.")
 
@@ -426,6 +384,28 @@ def preprocess_yelp():
     
     log.info(f"Successfully processed Yelp data and saved to: {os.path.abspath(output_ratings_filepath)}")
 
+def main():
+    """
+    Runs all preprocessing functions in sequence.
+    """
+    log.info("--- STARTING ALL DATASET PREPROCESSING ---")
+
+    # Preprocess datasets for experiments
+    preprocess_movielens()
+    preprocess_lastfm()
+    preprocess_bookcrossing()
+    preprocess_retailrocket()
+    preprocess_steam()
+    
+    # Preprocess Probe datasets for performance features
+    preprocess_amazon_books()
+    preprocess_online_retail()
+    preprocess_yelp()
+
+    log.info("--- ALL DATASET PREPROCESSING COMPLETE ---")
+
+
+
 
 if __name__ == "__main__":
-    preprocess_yelp()
+    main()
