@@ -1,0 +1,10 @@
+lenskit==2025.2.0
+lightgbm==4.6.0
+matplotlib==3.10.5
+networkx==3.4.2
+numpy==2.3.2
+pandas==2.3.2
+radon==6.0.1
+recbole==1.2.0
+scikit_learn==1.7.1
+scipy==1.16.1
