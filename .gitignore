@@ -5,6 +5,7 @@ data/processed/*
 !data/processed/.gitkeep
 # results
 results/code_features/*
+!results/code_features/conceptual_features.csv
 results/meta_learning_analysis/*
 results/meta_learning_data/*
 !results/code_features/.gitkeep

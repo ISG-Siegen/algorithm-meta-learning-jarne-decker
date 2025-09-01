@@ -1,0 +1,15 @@
+algorithm_identifier,family,learning_paradigm,handles_cold_start
+LK_Pop,Popularity,Non-Personalized,True
+LK_ItemKNN,Neighborhood,Item-based,False
+LK_ImplicitMF,Matrix Factorization,Pointwise-ALS,False
+LK_BPR,Matrix Factorization,Pairwise,False
+LK_UserUser,Neighborhood,User-based,False
+LK_BiasedMF,Matrix Factorization,Pointwise-SGD,False
+RB_Pop,Popularity,Non-Personalized,True
+RB_ItemKNN,Neighborhood,Item-based,False
+RB_BPR,Matrix Factorization,Pairwise,False
+RB_EASE,Autoencoder,Item-based,False
+RB_FPMC,Sequential,Markov Chain,False
+RB_MultiVAE,Autoencoder,Neural Network,False
+RB_FISM,Item Similarity,Item-based,False
+RB_LINE,Graph-based,Network Embedding,False
