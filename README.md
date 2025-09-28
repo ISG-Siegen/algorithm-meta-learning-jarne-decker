@@ -1,5 +1,18 @@
 # Intelligent Algorithm Selection for Recommender Systems: Meta-Learning via in-depth algorithm feature Engineering
+This repository contains the source code and experimental pipeline for the Bachelor's thesis by Jarne Mathi Decker, supervised by Prof. Dr. Joeran Beel at the University of Siegen.
 
+---
+
+### 📄 **Preprint**
+
+A preprint of the thesis is available on arXiv. If you use this code or the findings in your research, please cite this preprint:
+
+**https://arxiv.org/abs/2509.20134**
+
+### **Abstract**
+
+>The "No Free Lunch" theorem dictates that no single recommender algorithm is optimal for all users, creating a significant Algorithm Selection Problem. Standard meta-learning approaches aim to solve this by selecting an algorithm based on user features, but treat the fundamentally diverse algorithms themselves as equivalent, "black-box" choices. This thesis investigates the impact of overcoming this limitation by engineering a comprehensive feature set to explicitly characterize the algorithms themselves. We combine static code metrics, Abstract Syntax Tree properties, behavioral performance landmarks, and high-level conceptual features. We evaluate two meta-learners across five datasets: a baseline using only user features and our proposed model using both user and algorithm features. Our results show that the meta-learner augmented with algorithm features achieves an average NDCG@10 of 0.143, a statistically significant improvement of 11.7% over the Single Best Algorithm baseline (0.128). However, we found that the inclusion of algorithm features did not lead to an improvement in overall NDCG@10 over the meta learner using only user features (0.144). While adding algorithm features to the meta-learner did improve its Top-1 selection accuracy (+16.1%), this was counterbalanced by leading to a lower Top-3 accuracy (-10.7%). We conclude that for the per-user algorithm selection task in recommender systems, the predictive power of user features is overwhelmingly dominant. While algorithm features improve selection precision, unlocking their potential to boost overall performance remains a non-trivial challenge.
+---
 
 ## Requirements
 
@@ -10,7 +23,7 @@ pip install -r requirements.txt
 
 ## Pipeline execution
 The experimental pipeline is controlled via `scripts/run_pipeline.py`. 
-It consists of three seperate functions: ground-truth-generation, user and algorithm feature generation and meta-learning evaluation
+It consists of three separate functions: ground-truth-generation, user and algorithm feature generation, and meta-learning evaluation
 1. Ground truth generation
 2. User and algorithm feature generation
 3. Meta-Learner training and evaluation
